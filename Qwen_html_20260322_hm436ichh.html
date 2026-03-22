@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akkusativ - Tân ngữ trực tiếp</title>
+    <style>
+        :root {
+            --primary-color: #d35400;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #fdf6e3;
+            --text-color: #2c3e50;
+            --explanation-bg: #fff3cd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .app-container {
+            background: #fff;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            padding: 25px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        header p {
+            color: #666;
+            font-size: 16px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .question-text {
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 16px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover:not([disabled]) {
+            border-color: var(--primary-color);
+            background-color: #fff5eb;
+        }
+
+        .btn.correct {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .btn.incorrect {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--explanation-bg);
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            display: none;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .explanation-box h4 {
+            margin-top: 0;
+            color: #856404;
+            font-size: 18px;
+        }
+
+        .explanation-box p {
+            margin-bottom: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .next-btn, .restart-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .next-btn:hover, .restart-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #score-container {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 500px) {
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>Akkusativ - Tân ngữ trực tiếp</h1>
+            <p>Cách 4 trong tiếng Đức</p>
+        </header>
+
+        <div id="quiz-box">
+            <div class="question-text" id="question">Câu hỏi sẽ hiện ở đây...</div>
+            <div id="answer-buttons" class="btn-grid">
+                <!-- Các nút đáp án sẽ được tạo bằng JS -->
+            </div>
+            
+            <!-- Khung giải thích -->
+            <div id="explanation" class="explanation-box">
+                <h4>Giải thích:</h4>
+                <p id="explanation-text">Nội dung giải thích...</p>
+            </div>
+
+            <div class="controls">
+                <button id="next-btn" class="next-btn hide">Tiếp theo</button>
+            </div>
+        </div>
+
+        <div id="score-container" class="hide">
+            <h2>Kết Quả Thi</h2>
+            <p>Điểm số của bạn là:</p>
+            <div class="score-display" id="score">0 / 0</div>
+            <p id="final-message" style="font-style: italic; color: #666;"></p>
+            <button class="restart-btn" onclick="startQuiz()">Làm lại bài thi</button>
+        </div>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT ---
+
+        const questions = [
+            {
+                question: "1. (Tân ngữ trực tiếp) Ich sehe ___ (der Mann).",
+                answers: [
+                    { text: "der", correct: false },
+                    { text: "den", correct: true },
+                    { text: "die", correct: false },
+                    { text: "das", correct: false }
+                ],
+                explanation: "Danh từ 'Mann' là giống đực (Der). Khi làm tân ngữ trực tiếp (Akkusativ), 'Der' chuyển thành 'Den'."
+            },
+            {
+                question: "2. (Giống cái) Ich besuche ___ (die Oma).",
+                answers: [
+                    { text: "der", correct: false },
+                    { text: "die", correct: true },
+                    { text: "das", correct: false },
+                    { text: "den", correct: false }
+                ],
+                explanation: "Danh từ 'Oma' là giống cái (Die). Theo quy tắc: 'Cái, trung vẫn giữ thói quen', nên 'die' không đổi."
+            },
+            {
+                question: "3. (Giới từ 'für') Das Geschenk ist ___ den Sohn.",
+                answers: [
+                    { text: "für", correct: true },
+                    { text: "mit", correct: false },
+                    { text: "von", correct: false },
+                    { text: "bei", correct: false }
+                ],
+                explanation: "Giới từ 'für' (cho) luôn luôn đi với Akkusativ. Câu thơ nhắc: 'für, um, durch, ohne' nhớ lời đi chung."
+            },
+            {
+                question: "4. (Giới từ 'durch') Er geht ___ den Wald.",
+                answers: [
+                    { text: "in", correct: false },
+                    { text: "auf", correct: false },
+                    { text: "durch", correct: true },
+                    { text: "an", correct: false }
+                ],
+                explanation: "Giới từ 'durch' (xuyên qua) luôn đi với Akkusativ. 'den Wald' là dấu hiệu của giống đực Akkusativ."
+            },
+            {
+                question: "5. (Giới từ 'ohne') Sie kommt ___ ihren Freund.",
+                answers: [
+                    { text: "mit", correct: false },
+                    { text: "ohne", correct: true },
+                    { text: "für", correct: false },
+                    { text: "gegen", correct: false }
+                ],
+                explanation: "Giới từ 'ohne' (không có) luôn đi với Akkusativ. 'ihren Freund' (giống đực) xác nhận điều này."
+            },
+            {
+                question: "6. (Wechselpräposition - Di chuyển) Ich gehe ___ die Bibliothek.",
+                answers: [
+                    { text: "in", correct: true },
+                    { text: "im", correct: false },
+                    { text: "an", correct: false },
+                    { text: "auf", correct: false }
+                ],
+                explanation: "Hành động 'đi vào' (di chuyển từ ngoài vào trong). Với giới từ hỗn hợp 'in', di chuyển (Wohin?) dùng Akkusativ."
+            },
+            {
+                question: "7. (Wechselpräposition - Di chuyển) Er legt das Buch ___ den Tisch.",
+                answers: [
+                    { text: "unter", correct: false },
+                    { text: "neben", correct: false },
+                    { text: "auf", correct: true },
+                    { text: "hinter", correct: false }
+                ],
+                explanation: "Hành động 'đặt lên trên' (di chuyển lên mặt bàn). Giới từ 'auf' + di chuyển = Akkusativ."
+            },
+            {
+                question: "8. (Khái niệm) Khi nào dùng Akkusativ với giới từ hỗn hợp (in, an, auf...)?",
+                answers: [
+                    { text: "Khi hỏi 'Wo?' (Ở đâu)", correct: false },
+                    { text: "Khi chỉ vị trí cố định", correct: false },
+                    { text: "Khi chỉ sự di chuyển (Wohin?)", correct: true },
+                    { text: "Khi danh từ là giống cái", correct: false }
+                ],
+                explanation: "Câu thơ: 'Di chuyển Cách Bốn, chớ mờ tâm linh'. Khi có sự di chuyển (Wohin?), ta dùng Akkusativ."
+            },
+            {
+                question: "9. (Giới từ 'gegen') Der Ball fliegt ___ die Wand.",
+                answers: [
+                    { text: "an", correct: false },
+                    { text: "gegen", correct: true },
+                    { text: "bei", correct: false },
+                    { text: "von", correct: false }
+                ],
+                explanation: "Giới từ 'gegen' (chống lại/va vào) luôn đi với Akkusativ. Thuộc nhóm: 'gegen, bis, entlang'."
+            },
+            {
+                question: "10. (So sánh Dativ vs Akkusativ) Die Vase steht ___ dem Tisch.",
+                answers: [
+                    { text: "auf", correct: true },
+                    { text: "in", correct: false },
+                    { text: "unter", correct: false },
+                    { text: "neben", correct: false }
+                ],
+                explanation: "Câu này dùng 'dem' (Dativ), nghĩa là vị trí cố định (Wo?). 'auf' là giới từ hỗn hợp, ở trạng thái tĩnh dùng Dativ."
+            }
+        ];
+
+        const questionElement = document.getElementById('question');
+        const answerButtonsElement = document.getElementById('answer-buttons');
+        const nextButton = document.getElementById('next-btn');
+        const quizBox = document.getElementById('quiz-box');
+        const scoreContainer = document.getElementById('score-container');
+        const scoreDisplay = document.getElementById('score');
+        const finalMessage = document.getElementById('final-message');
+        const explanationBox = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.classList.add('hide');
+            quizBox.classList.remove('hide');
+            scoreContainer.classList.add('hide');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            let currentQuestion = questions[currentQuestionIndex];
+            let questionNo = currentQuestionIndex + 1;
+            questionElement.innerHTML = questionNo + ". " + currentQuestion.question;
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerHTML = answer.text;
+                button.classList.add('btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsElement.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextButton.classList.add('hide');
+            explanationBox.style.display = 'none';
+            while (answerButtonsElement.firstChild) {
+                answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === "true";
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            if (isCorrect) {
+                selectedBtn.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('incorrect');
+            }
+
+            Array.from(answerButtonsElement.children).forEach(button => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            explanationText.innerHTML = currentQuestion.explanation;
+            explanationBox.style.display = 'block';
+
+            nextButton.classList.remove('hide');
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+        });
+
+        function showScore() {
+            quizBox.classList.add('hide');
+            scoreContainer.classList.remove('hide');
+            scoreDisplay.innerHTML = `${score} / ${questions.length}`;
+            
+            if(score === questions.length) {
+                finalMessage.innerHTML = "Xuất sắc! Bạn đã nắm vững Akkusativ.";
+                finalMessage.style.color = "green";
+            } else if (score > questions.length / 2) {
+                finalMessage.innerHTML = "Khá tốt! Hãy ôn lại các giới từ hỗn hợp.";
+                finalMessage.style.color = "orange";
+            } else {
+                finalMessage.innerHTML = "Cần cố gắng! Hãy đọc lại lý thuyết và ví dụ.";
+                finalMessage.style.color = "red";
+            }
+        }
+
+        startQuiz();
+    </script>
+</body>
+</html>
